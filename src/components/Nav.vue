@@ -2,7 +2,7 @@
 
 ul.nav.nav-pills.nav-fill
   li.nav-item(v-for="(table, $index) in tables")
-    a.nav-link(:class="{'active': getActiveTable($index)}" @click="pick($event, $index)") Table №{{ $index + 1 }}
+    a.nav-link(:class="{'active': getActiveTable($index)}" @click="$emit('pick', $index)") Table №{{ $index + 1 }}
     .icons
       .delete-icon(@click="deleteTable($index)" title="Delete table")
         i.fas.fa-trash-alt
@@ -33,10 +33,6 @@ export default {
       let JSONObj = JSON.stringify(this.tables[i])
       // Если чесно то бесмыслица такаято, но таков пункт в задании...
       console.log(JSON.parse(JSONObj))
-    },
-    pick (e, i) {
-      // console.log(e.target)
-      this.pickTable(i)
     },
     getActiveTable (index) {
       if (this.table) return this.table.index === index

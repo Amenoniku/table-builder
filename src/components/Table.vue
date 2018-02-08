@@ -11,20 +11,63 @@
         th(scope='col') Phone
         th(scope='col') Email
         th(scope='col') Action
-    tbody
-      tr(v-for="(row, $index) in rows" v-if="getRange($index)")
-        th(scope='row') {{ $index }}
+    tbody(v-if="table.length > 0")
+      tr(v-for="(row, index) in table" v-if="getRange(index)")
+        th(scope='row') {{ index }}
         td {{ row.id }}
-        td {{ row.firstName }}
-        td {{ row.lastName }}
-        td {{ row.phone }}
-        td {{ row.email }}
+        td(@keyup.enter="saveEditRow" @dblclick="editField(index, 'firstName', row.firstName)")
+          input.form-control(
+            v-if="editableRow.field === 'firstName' && editableRow.index === index"
+            type='text'
+            v-model="editForms.firstName"
+            placeholder='First name'
+          )
+          span(v-else) {{ row.firstName }}
+        td(@keyup.enter="saveEditRow" @dblclick="editField(index, 'lastName', row.lastName)")
+          input.form-control(
+            v-if="editableRow.field === 'lastName' && editableRow.index === index"
+            type='text'
+            v-model="editForms.lastName"
+            placeholder='Last name'
+          )
+          span(v-else) {{ row.lastName }}
+        td(@keyup.enter="saveEditRow" @dblclick="editField(index, 'phone', row.phone)")
+          input.form-control(
+            v-if="editableRow.field === 'phone' && editableRow.index === index"
+            type='text'
+            v-model="editForms.phone"
+            placeholder='Phone'
+          )
+          span(v-else) {{ row.phone }}
+        td(@keyup.enter="saveEditRow" @dblclick="editField(index, 'email', row.email)")
+          input.form-control(
+            v-if="editableRow.field === 'email' && editableRow.index === index"
+            type='text'
+            v-model="editForms.email"
+            placeholder='Email'
+          )
+          span(v-else) {{ row.email }}
         td
-          button.btn.btn-primary(type='button' @click="$emit('addRows')")
+          button.btn.btn-primary(type='button' @click="addRows({row: row, index})")
             i.fas.fa-plus-square
-          button.btn.btn-success(type='button' @click="$emit('editRows')")
-            i.fas.fa-pen-square
-          button.btn.btn-danger(type='button' @click="$emit('DeleteRows')")
+          button.btn.btn-danger(type='button' @click="deleteRows(index)")
+            i.fas.fa-trash-alt
+    tbody(v-else)
+      tr
+        th(scope='row') 0
+        td 000
+        td
+          input#inputRows.form-control(type='text' v-model="editForms.firstName" placeholder='First name')
+        td
+          input#inputRows.form-control(type='text' v-model="editForms.lastName" placeholder='Last name')
+        td
+          input#inputRows.form-control(type='text' v-model="editForms.phone" placeholder='Phone')
+        td
+          input#inputRows.form-control(type='text' v-model="editForms.email" placeholder='Email')
+        td
+          button.btn.btn-primary(type='button' @click="addRows({row: editForms})")
+            i.fas.fa-plus-square
+          button.btn.btn-danger(type='button' @click="deleteRows($index)")
             i.fas.fa-trash-alt
   Pagination(
     v-if="numberOfPages > 0"
@@ -36,6 +79,8 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex'
+
 import Pagination from './Pagination'
 
 export default {
@@ -43,19 +88,46 @@ export default {
   components: {
     Pagination
   },
-  props: ['rows'],
   data () {
     return {
       showedRows: 10,
-      currentPage: 1
+      currentPage: 1,
+
+      editableRow: {
+        index: undefined,
+        field: undefined,
+        value: undefined
+      },
+
+      editForms: {
+        firstName: '',
+        lastName: '',
+        phone: '',
+        email: ''
+      }
     }
   },
   computed: {
     numberOfPages () {
-      return Math.floor(this.rows.length / this.showedRows)
-    }
+      return Math.floor(this.table.length / this.showedRows)
+    },
+    ...mapState('main', {
+      table: state => state.pickedTable,
+      tableId: state => state.tableId
+    })
   },
   methods: {
+    editField (index, field, value) {
+      this.editableRow = {index, field, value}
+      this.editForms[field] = value
+    },
+    saveEditRow () {
+      this.editRows({
+        row: this.editableRow,
+        value: this.editForms[this.editableRow.field]
+      })
+      this.editableRow = {}
+    },
     goToPage (page) {
       if (typeof page === 'string') {
         if (page === 'prev') {
@@ -75,7 +147,12 @@ export default {
         index > ((this.showedRows * this.currentPage) - this.showedRows) - 1 &&
         index < (this.showedRows * this.currentPage)
       )
-    }
+    },
+    ...mapActions('main', {
+      addRows: 'addRows',
+      editRows: 'editRows',
+      deleteRows: 'deleteRows'
+    })
   }
 }
 </script>

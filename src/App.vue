@@ -8,14 +8,15 @@
         input#inputRows.form-control(type='number' v-model="numberOfRows" placeholder='Number of rows')
       button.btn.btn-primary.mb-2(type='button' @click="generateTable") Generate the table!
 
-  Nav
-  Table(v-if="table" :rows="table")
+  Nav(@pick="pick")
+  Table(v-if="tableShow")
   h4(v-else) Please generate or pick the table!
 
 </template>
 
 <script>
 
+import Vue from 'vue'
 import { mapState, mapActions } from 'vuex'
 
 import 'bootstrap/dist/css/bootstrap.css'
@@ -31,6 +32,7 @@ export default {
   },
   data () {
     return {
+      tableShow: false,
       numberOfRows: 50
     }
   },
@@ -40,18 +42,31 @@ export default {
       table: state => state.pickedTable
     })
   },
+  watch: {
+    table () {
+      Vue.nextTick(() => {
+        this.tableShow = true
+      })
+    }
+  },
   methods: {
+    pick (i) {
+      this.tableShow = false
+      this.pickTable(i)
+    },
     generateTable () {
       this.getTable(parseInt(this.numberOfRows))
     },
     ...mapActions('main', {
-      getTable: 'getTable'
+      getTable: 'getTable',
+      pickTable: 'pickTable'
     })
   },
   mounted () {
     // let smallData = 32
     // let bigData = 1000
     if (this.tables.length === 0) {
+      this.getTable(0)
       this.getTable(1000)
       this.getTable(32)
     }
