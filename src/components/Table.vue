@@ -5,11 +5,26 @@
     thead
       tr
         th(scope='col') #
-        th(scope='col') id
-        th(scope='col') First name
-        th(scope='col') Last name
-        th(scope='col') Phone
-        th(scope='col') Email
+        th(scope='col' @click="sortTable('id')") id
+          span(v-if="sort.id !== undefined")
+            span(v-if="sort.id") ▲
+            span(v-else) ▼
+        th(scope='col' @click="sortTable('firstName')") First name
+          span(v-if="sort.firstName !== undefined")
+            span(v-if="sort.firstName") ▲
+            span(v-else) ▼
+        th(scope='col' @click="sortTable('lastName')") Last name
+          span(v-if="sort.lastName !== undefined")
+            span(v-if="sort.lastName") ▲
+            span(v-else) ▼
+        th(scope='col' @click="sortTable('phone')") Phone
+          span(v-if="sort.phone !== undefined")
+            span(v-if="sort.phone") ▲
+            span(v-else) ▼
+        th(scope='col' @click="sortTable('email')") Email
+          span(v-if="sort.email !== undefined")
+            span(v-if="sort.email") ▲
+            span(v-else) ▼
         th(scope='col') Action
     tbody(v-if="table.length > 0")
       tr(v-for="(row, index) in table" v-if="getRange(index)")
@@ -93,6 +108,14 @@ export default {
       showedRows: 10,
       currentPage: 1,
 
+      sort: {
+        id: undefined,
+        firstName: undefined,
+        lastName: undefined,
+        phone: undefined,
+        email: undefined
+      },
+
       editableRow: {
         index: undefined,
         field: undefined,
@@ -117,6 +140,41 @@ export default {
     })
   },
   methods: {
+    sortTable (field) {
+      let stringCompare = (a, b) => {
+        if (this.sort[field]) return a[field].localeCompare(b[field])
+        else return b[field].localeCompare(a[field])
+      }
+
+      switch (field) {
+        case 'id':
+          this.table.sort((a, b) => {
+            if (this.sort[field]) return a[field] - b[field]
+            else return b[field] - a[field]
+          })
+          break
+        case 'firstName':
+          this.table.sort(stringCompare)
+          break
+        case 'lastName':
+          this.table.sort(stringCompare)
+          break
+        case 'phone':
+          this.table.sort((a, b) => {
+            if (this.sort[field]) return +a[field].replace(/\D/g, '') - +b[field].replace(/\D/g, '')
+            else return +b[field].replace(/\D/g, '') - +a[field].replace(/\D/g, '')
+          })
+          break
+        case 'email':
+          this.table.sort(stringCompare)
+          break
+      }
+      let state = this.sort[field]
+      for (let k in this.sort) {
+        this.sort[k] = undefined
+      }
+      this.sort[field] = !state
+    },
     editField (index, field, value) {
       this.editableRow = {index, field, value}
       this.editForms[field] = value
