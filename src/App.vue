@@ -65,11 +65,12 @@ export default {
   mounted () {
     // let smallData = 32
     // let bigData = 1000
-    if (this.tables.length === 0) {
-      // this.getTable(0)
-      this.getTable(1000)
-      this.getTable(32)
-    }
+    // for test
+    // if (this.tables.length === 0) {
+    //   this.getTable(3)
+    //   this.getTable(1000)
+    //   this.getTable(32)
+    // }
   }
 }
 </script>

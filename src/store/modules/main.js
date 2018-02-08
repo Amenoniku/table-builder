@@ -35,10 +35,11 @@ export default {
     },
     [ADD_ROWS] (state, {row, index}) {
       if (index === undefined) index = 0
+      let newRow = Object.assign({}, row)
       let min = 1
       let max = 999
-      if (row.id === undefined) row.id = Math.round(min + Math.random() * (max - min))
-      state.tables[state.pickedTable.index].splice(index, 0, row)
+      newRow.id = Math.round(min + Math.random() * (max - min))
+      state.tables[state.pickedTable.index].splice(index, 0, newRow)
     },
     [EDIT_ROWS] (state, {row, value}) {
       state.tables[state.pickedTable.index][row.index][row.field] = value

@@ -1,6 +1,12 @@
 <template lang="pug">
 
 .container
+  .container
+    form.form-inline
+      .form-group.mx-sm-3.mb-2
+        label.col-sm-3.col-form-label(for='inputSearch') Search
+        input#inputSearch.form-control(type='text' v-model="searchStr" placeholder='Typing of search...')
+      button.btn.btn-primary.mb-2(type='button' @click="search") Searching!
   table.table.table-striped
     thead
       tr
@@ -27,7 +33,7 @@
             span(v-else) ▼
         th(scope='col') Action
     tbody(v-if="table.length > 0")
-      tr(v-for="(row, index) in table" v-if="getRange(index)")
+      tr(v-for="(row, index) in filteredTable" v-if="getRange(index)")
         th(scope='row') {{ index }}
         td {{ row.id }}
         td(@keyup.enter="saveEditRow" @dblclick="editField(index, 'firstName', row.firstName)")
@@ -108,6 +114,8 @@ export default {
       showedRows: 10,
       currentPage: 1,
 
+      searchStr: '',
+
       sort: {
         id: undefined,
         firstName: undefined,
@@ -131,8 +139,18 @@ export default {
     }
   },
   computed: {
+    filteredTable () {
+      return this.table.filter((item) => {
+        for (let k in item) {
+          let v = item[k]
+          if (typeof v === 'object') continue
+          v = '' + v
+          if (v.toLowerCase().includes(this.searchStr.toLowerCase())) return true
+        }
+      })
+    },
     numberOfPages () {
-      return Math.floor(this.table.length / this.showedRows)
+      return Math.floor(this.filteredTable.length / this.showedRows)
     },
     ...mapState('main', {
       table: state => state.pickedTable,
@@ -140,6 +158,9 @@ export default {
     })
   },
   methods: {
+    search () {
+      alert('Не совсем понял что должна делать эта кнопка. \nОписание " Перефильтрация осуществляется по нажатию на кнопку Найти" крайне непонятна')
+    },
     sortTable (field) {
       let stringCompare = (a, b) => {
         if (this.sort[field]) return a[field].localeCompare(b[field])
@@ -185,6 +206,7 @@ export default {
         value: this.editForms[this.editableRow.field]
       })
       this.editableRow = {}
+      this.editForms = {}
     },
     goToPage (page) {
       if (typeof page === 'string') {
